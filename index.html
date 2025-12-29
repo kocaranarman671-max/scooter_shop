@@ -1,238 +1,66 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Скутер Маркет</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-body{margin:0;font-family:'Segoe UI',sans-serif;background:#0e0e0e;color:#fff;overflow:hidden;}
-.search-container{padding:10px 16px;}
-.search-container input{width:100%;padding:10px;border-radius:20px;border:none;background:#222;color:#fff;outline:none;}
-.search-container input:focus{background:#333;}
-.tab-content{position:absolute;top:0;left:0;width:100%;height:100%;transition:opacity 0.3s;opacity:0;pointer-events:none;display:flex;flex-direction:column;}
-.tab-content.active{opacity:1;pointer-events:auto;}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;padding:16px;padding-bottom:120px;overflow-y:auto;flex:1;}
-.card{background:#181818;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,0.4);}
-.card img{width:100%;height:120px;object-fit:cover;border-radius:16px;margin-bottom:6px;}
-.card .name{margin-bottom:2px;font-weight:600;font-size:14px;}
-.card .price{font-weight:600;margin-bottom:6px;font-size:14px;}
-.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#151515;border-top:1px solid #222;padding:10px 0;align-items:center;z-index:10;}
-.nav button{background:none;border:none;color:#aaa;font-size:12px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:0.3s;}
-.nav button.active{color:#2f80ff;font-weight:600;}
-.nav img{width:24px;height:24px;margin-bottom:2px;border-radius:50%;}
-.cart{position:fixed;inset:0;background:rgba(14,14,14,0.95);display:flex;flex-direction:column;z-index:1001;opacity:0;transform:translateY(100%);transition:0.3s;}
-.cart.open{opacity:1;transform:translateY(0);}
-.cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;}
-.cart-items{flex:1;overflow:auto;padding:16px;}
-.cart-item{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.cart-item img{width:60px;height:60px;object-fit:cover;border-radius:12px;margin-right:12px;}
-.cart-item-info{flex:1;}
-.qty-controls{display:flex;gap:6px;align-items:center;margin-top:4px;}
-.qty-controls button{width:28px;height:28px;border:none;border-radius:50%;background:#2f80ff;color:#fff;font-size:16px;cursor:pointer;}
-.qty-controls button:hover{background:#1c5ac7;}
-.remove{color:#ff4d4d;cursor:pointer;margin-left:8px;}
-.cart-footer{padding:16px;border-top:1px solid #222;display:flex;flex-direction:column;gap:10px;}
-input.promo{padding:8px;border-radius:14px;border:none;background:#222;color:#fff;width:100%;}
-input.promo:focus{background:#333;}
-.product-detail{position:fixed;inset:0;background:#0e0e0e;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:0.3s;z-index:1002;}
-.product-detail.open{opacity:1;pointer-events:auto;}
-.product-detail img{width:100%;height:200px;object-fit:cover;}
-.product-detail-content{flex:1;padding:16px;overflow-y:auto;}
-.product-detail-content h2{margin:0 0 8px 0;}
-.product-detail-content p{margin:0 0 12px 0;line-height:1.4;}
-.product-detail .close-detail{position:absolute;top:16px;right:16px;font-size:24px;cursor:pointer;}
-.product-detail button{padding:10px;border:none;border-radius:14px;margin:5px;background:#2f80ff;color:#fff;cursor:pointer;font-weight:600;width:48%;}
-.product-detail .buttons{display:flex;justify-content:space-between;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scooter Parts Shop</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0e0e0e;color:#fff}
+    header{padding:16px;text-align:center;font-size:22px;font-weight:600;background:#151515;border-bottom:1px solid #222}
+    .search{padding:12px 16px}
+    .search input{width:100%;padding:12px;border-radius:14px;border:none;background:#1b1b1b;color:#fff}
+    .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:16px}
+    .card{background:#181818;border-radius:18px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,.45);display:flex;flex-direction:column}
+    .card img{width:100%;height:140px;object-fit:cover}
+    .card-content{padding:12px;flex:1}
+    .desc{font-size:13px;opacity:.7;margin-bottom:8px}
+    .price{font-weight:600;margin-bottom:10px}
+    .qty{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    .qty button{width:32px;height:32px;border-radius:50%;border:none;background:#2f80ff;color:#fff;font-size:18px}
+    .add{width:100%;border:none;border-radius:14px;padding:10px;background:linear-gradient(135deg,#2f80ff,#6aa8ff);color:#fff}
+    .cart-btn{position:fixed;bottom:16px;left:16px;right:16px;background:#25d366;font-size:16px;padding:14px;border-radius:18px}
+    .cart{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column}
+    .cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222}
+    .cart-items{flex:1;overflow:auto;padding:16px}
+    .cart-item{display:flex;justify-content:space-between;margin-bottom:10px}
+    .remove{color:#ff4d4d;cursor:pointer}
+    .cart-footer{padding:16px;border-top:1px solid #222}
+  </style>
 </head>
 <body>
-
-<div class="search-container">
-  <input type="text" id="searchInput" placeholder="Поиск товара..." oninput="filterProducts()">
-</div>
-
-<div id="main" class="tab-content active">
-  <div class="products" id="mainProducts"></div>
-</div>
-
-<div id="fav" class="tab-content">
-  <div class="products" id="favProducts"></div>
-</div>
-
-<div id="cartTab" class="tab-content"><button class="cart-btn" onclick="openCart()">🛒 Оформить заказ</button>
-</div>
-
-<div id="profile" class="tab-content">
-  <div class="profile-info" style="padding:16px;">
-    <img id="userAvatar" src="" alt="Аватар">
-    <div>
-      <div id="userName"></div>
-      <div id="userID"></div>
-    </div>
-  </div>
-</div>
+<header>🛵 Магазин запчастей</header>
+<div class="search"><input placeholder="Поиск..." oninput="search(this.value)"></div>
+<div class="products" id="products"></div>
+<button class="cart-btn" onclick="openCart()">🛒 Корзина</button>
 
 <div class="cart" id="cart">
-  <div class="cart-header">Корзина <span onclick="closeCart()" style="cursor:pointer">✕</span></div>
+  <div class="cart-header">Корзина</div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
-    <input type="text" id="promoCode" class="promo" placeholder="Промокод (если есть)">
-    <button class="cart-btn" onclick="checkout()" style="position:static;margin-top:10px;">Подтвердить заказ</button>
+    <button class="add" onclick="checkout()">Оформить заказ</button>
+    <button class="add" style="margin-top:10px;background:#444" onclick="closeCart()">Закрыть</button>
   </div>
-</div>
-
-<div class="product-detail" id="productDetail">
-  <span class="close-detail" onclick="closeDetail()">✕</span>
-  <img id="detailImg" src="">
-  <div class="product-detail-content">
-    <h2 id="detailName"></h2>
-    <p id="detailPrice"></p>
-    <p id="detailDesc"></p>
-    <div class="buttons">
-      <button onclick="addToFav()">❤️ В избранное</button>
-      <button onclick="addToCart()">🛒 В корзину</button>
-    </div>
-  </div>
-</div>
-
-<div class="nav">
-  <button class="active" onclick="switchTab('main')"><span>🏠</span>Главное</button>
-  <button onclick="switchTab('fav')"><span>❤️</span>Избранное</button>
-  <button onclick="switchTab('cartTab')"><span>🛒</span>Корзина</button>
-  <button onclick="switchTab('profile')"><img id="navAvatar" src="" alt="">Профиль</button>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp; tg.expand();
-const user = tg.initDataUnsafe?.user || {};
-document.getElementById('userAvatar').src = user?.photo_url || '';
-document.getElementById('navAvatar').src = user?.photo_url || '';
-document.getElementById('userName').innerText = user?.first_name || 'Пользователь';
-document.getElementById('userID').innerText = 'ID: '+(user?.id||'');
+const GOOGLE_SHEET_URL='https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
+const ADMIN_USERNAME='andrew_malov';
+let allProducts=[];
+let cart=JSON.parse(localStorage.getItem('cart')||'[]');
 
-const GOOGLE_SHEET_URL = 'https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
-const ADMIN_USERNAME = 'andrew_malov';
-
-let allProducts=[], filteredProducts=[], cart=JSON.parse(localStorage.getItem('cart')||'[]'), favorites=JSON.parse(localStorage.getItem('favorites')||'[]'), categories=[], currentProduct=null;
-
-async function loadProducts(){
-  const r = await fetch(GOOGLE_SHEET_URL);
-  allProducts = await r.json();
-  filteredProducts = [...allProducts];
-  categories = Array.from(new Set(allProducts.map(p=>p.category||'Разное')));
-  renderMain();
-  renderFav();
-}
-
-function filterProducts(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  filteredProducts = allProducts.filter(p=>p.name.toLowerCase().includes(q));
-  renderMain();
-}
-
-function renderMain(){
-  const c=document.getElementById('mainProducts');
-  c.innerHTML='';
-  filteredProducts.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML=`<img src="${p.image}"><div class="price">${p.price} ₽</div><div class="name">${p.name}</div>`;
-    d.onclick = () => openDetail(p);
-    c.appendChild(d);
-  });
-}
-
-function renderFav(){
-  const c=document.getElementById('favProducts');
-  c.innerHTML='';
-  const favProducts=allProducts.filter(p=>favorites.includes(p.name));
-  favProducts.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML=`<img src="${p.image}"><div class="price">${p.price} ₽</div><div class="name">${p.name}</div>`;
-    d.onclick=()=>openDetail(p);
-    c.appendChild(d);
-  });
-}
-
-function openDetail(p){
-  currentProduct = p;
-  document.getElementById('productDetail').classList.add('open');
-  document.getElementById('detailImg').src=p.image;
-  document.getElementById('detailName').innerText=p.name;
-  document.getElementById('detailPrice').innerText=p.price+' ₽';
-  document.getElementById('detailDesc').innerText=p.description||'Описание отсутствует';
-}
-
-function closeDetail(){document.getElementById('productDetail').classList.remove('open');}
-
-function addToFav(){
-  if(!currentProduct) return;
-  if(!favorites.includes(currentProduct.name)) favorites.push(currentProduct.name);
-  localStorage.setItem('favorites',JSON.stringify(favorites));
-  renderFav();
-  alert('Добавлено в избранное');
-}
-
-function addToCart(){
-  if(!currentProduct) return;
-  let idx=cart.findIndex(p=>p.name===currentProduct.name);
-  if(idx>-1) cart[idx].qty+=1;
-  else cart.push({...currentProduct, qty:1});
-  localStorage.setItem('cart',JSON.stringify(cart));
-  alert('Добавлено в корзину');
-}
-
-function switchTab(tab){
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`.nav button[onclick*="${tab}"]`).classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  closeDetail();
-}
-
-function openCart(){document.getElementById('cart').classList.add('open'); drawCart();}
-function closeCart(){document.getElementById('cart').classList.remove('open');}
-function drawCart(){
-  const c=document.getElementById('cartItems');
-  c.innerHTML='';
-  cart.forEach((p,i)=>{
-    const d=document.createElement('div');
-    d.className='cart-item';
-    d.innerHTML=`
-      <img src="${p.image}">
-      <div class="cart-item-info">
-        <div>${p.name}</div>
-        <div class="qty-controls">
-          <button onclick="changeQty(${i},-1)">−</button>
-          <span>${p.qty}</span>
-          <button onclick="changeQty(${i},1)">+</button>
-          <span class="remove" onclick="del(${i})">✕</span>
-        </div>
-      </div>
-      <div>${p.price*p.qty} ₽</div>
-    `;
-    c.appendChild(d);
-  });
-}
-function changeQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d); localStorage.setItem('cart',JSON.stringify(cart)); drawCart();}
-function del(i){cart.splice(i,1); localStorage.setItem('cart',JSON.stringify(cart)); drawCart();}
-
-function checkout(){
-  if(!cart.length) return;
-  const promo=document.getElementById('promoCode').value;
-  let t='🛒 Заказ:%0A%0A';
-  let sum=0;
-  cart.forEach((p,i)=>{
-    t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`;
-    sum+=p.price*p.qty;
-  });
-  if(promo) t+=`%0AПромокод: ${promo}`;
-  t+=`%0AИтого: ${sum} ₽`;
-  tg.openTelegramLink(`https://t.me/${ADMIN_USERNAME}?text=${t}`);
-}
-
+async function loadProducts(){const r=await fetch(GOOGLE_SHEET_URL);allProducts=await r.json();render(allProducts)}
+function render(arr){const c=document.getElementById('products');c.innerHTML='';arr.forEach((p,i)=>{p.qty=p.qty||1;const d=document.createElement('div');d.className='card';d.innerHTML=`<img src="${p.image}"><div class=card-content><h3>${p.name}</h3><div class=desc>${p.description}</div><div class=price>${p.price} ₽</div><div class=qty><button onclick="chg(${i},-1)">−</button><span id=q${i}>${p.qty}</span><button onclick="chg(${i},1)">+</button></div><button class=add onclick="add(${i})">В корзину</button></div>`;c.appendChild(d)})}
+function chg(i,d){allProducts[i].qty=Math.max(1,allProducts[i].qty+d);document.getElementById('q'+i).innerText=allProducts[i].qty}
+function add(i){const p=allProducts[i];const f=cart.find(x=>x.name===p.name);if(f)f.qty+=p.qty;else cart.push({...p});save()}
+function save(){localStorage.setItem('cart',JSON.stringify(cart));tg.HapticFeedback.impactOccurred('light')}
+function search(q){q=q.toLowerCase();render(allProducts.filter(p=>p.name.toLowerCase().includes(q)))}
+function openCart(){document.getElementById('cart').style.display='flex';drawCart()}
+function closeCart(){document.getElementById('cart').style.display='none'}
+function drawCart(){const c=document.getElementById('cartItems');c.innerHTML='';cart.forEach((p,i)=>{const d=document.createElement('div');d.className='cart-item';d.innerHTML=`<div>${p.name} x${p.qty}</div><div><span>${p.price*p.qty} ₽</span> <span class=remove onclick="del(${i})">✕</span></div>`;c.appendChild(d)})}
+function del(i){cart.splice(i,1);save();drawCart()}
+function checkout(){if(!cart.length)return;let t='🛒 Заказ:%0A%0A',sum=0;cart.forEach((p,i)=>{t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`;sum+=p.price*p.qty});t+=`%0AИтого: ${sum} ₽`;tg.openTelegramLink(`https://t.me/${ADMIN_USERNAME}?text=${t}`)}
 loadProducts();
 </script>
 </body>
