@@ -3,35 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scooter Parts Shop</title>
+<title>Scooter Shop</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;font-family:sans-serif;background:#0e0e0e;color:#fff}
 header{padding:16px;text-align:center;font-size:22px;background:#151515;border-bottom:1px solid #222}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:16px}
+.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#151515;border-top:1px solid #222;padding:10px 0;}
+.nav button{background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;}
+.nav button.active{color:#2f80ff;font-weight:600;}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:16px;padding-bottom:70px}
 .card{background:#181818;border-radius:18px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .card img{width:100%;height:140px;object-fit:cover}
 .card .price{font-weight:600;margin:8px 0}
 .add{width:90%;border:none;border-radius:14px;padding:8px;background:linear-gradient(135deg,#2f80ff,#6aa8ff);color:#fff;cursor:pointer}
-.modal{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column;padding:16px}
+.modal{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column;padding:16px;z-index:1000}
 .modal .close{align-self:flex-end;color:#ff4d4d;font-size:24px;cursor:pointer}
 .modal img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px}
 .modal .desc{margin-bottom:12px}
 .qty{display:flex;gap:8px;align-items:center;margin-bottom:12px}
 .qty button{width:32px;height:32px;border-radius:50%;border:none;background:#2f80ff;color:#fff;font-size:18px}
-.cart-btn{position:fixed;bottom:16px;left:16px;right:16px;background:#25d366;font-size:16px;padding:14px;border-radius:18px}
 .cart{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column}
-.cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222}
+.cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center}
 .cart-items{flex:1;overflow:auto;padding:16px}
 .cart-item{display:flex;justify-content:space-between;margin-bottom:10px}
 .remove{color:#ff4d4d;cursor:pointer}
-.cart-footer{padding:16px;border-top:1px solid #222}
+.cart-footer{padding:16px;border-top:1px solid #222;display:flex;flex-direction:column;gap:10px}
+.search{margin:16px;display:flex;gap:8px}
+.search input{flex:1;padding:8px;border-radius:12px;border:none;background:#222;color:#fff}
+.categories{display:flex;overflow-x:auto;padding:0 16px 10px 16px;gap:10px}
+.categories button{padding:6px 12px;border:none;border-radius:12px;background:#222;color:#fff;cursor:pointer;white-space:nowrap}
+.categories button.active{background:#2f80ff}
 </style>
 </head>
 <body>
 <header>🛵 Магазин запчастей</header>
+
+<!-- Поиск -->
+<div class="search">
+  <input type="text" id="searchInput" placeholder="Поиск товара..." oninput="searchProducts()">
+</div>
+
+<!-- Категории -->
+<div class="categories" id="categories"></div>
+
 <div class="products" id="products"></div>
-<button class="cart-btn" onclick="openCart()">🛒 Корзина</button>
 
 <!-- Модальное окно товара -->
 <div class="modal" id="modal">
@@ -45,26 +60,34 @@ header{padding:16px;text-align:center;font-size:22px;background:#151515;border-b
     <span id="modalQty">1</span>
     <button onclick="changeQty(1)">+</button>
   </div>
+  <input type="text" id="promoCode" placeholder="Промокод (если есть)" style="margin-bottom:12px;padding:8px;border-radius:12px;border:none;background:#222;color:#fff;">
   <button class="add" onclick="addFromModal()">В корзину</button>
 </div>
 
 <!-- Корзина -->
 <div class="cart" id="cart">
-  <div class="cart-header">Корзина</div>
+  <div class="cart-header">Корзина <span onclick="closeCart()" style="cursor:pointer">✕</span></div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
     <button class="add" onclick="checkout()">Оформить заказ</button>
-    <button class="add" style="margin-top:10px;background:#444" onclick="closeCart()">Закрыть</button>
   </div>
 </div>
 
-<script>
+<!-- Нижнее меню -->
+<div class="nav">
+  <button class="active" onclick="switchTab('main')">Главное</button>
+  <button onclick="switchTab('fav')">Избранное</button>
+  <button onclick="switchTab('cartTab')">Корзина</button>
+  <button onclick="switchTab('profile')">Профиль</button>
+</div><script>
 const tg = window.Telegram.WebApp; tg.expand();
 
 const GOOGLE_SHEET_URL = 'https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
 const ADMIN_USERNAME = 'andrew_malov';
 
-let allProducts=[];
+let allProducts=[]; // все товары
+let filteredProducts=[];
+let categories=[]; 
 let cart=JSON.parse(localStorage.getItem('cart')||'[]');
 let currentQty=1;
 let currentProduct=null;
@@ -72,7 +95,34 @@ let currentProduct=null;
 async function loadProducts(){
   const r = await fetch(GOOGLE_SHEET_URL);
   allProducts = await r.json();
-  render(allProducts);
+  // формируем список категорий
+  const catSet = new Set(allProducts.map(p=>p.category||'Разное'));
+  categories = Array.from(catSet);
+  renderCategories();
+  filteredProducts = [...allProducts];
+  render(filteredProducts);
+}
+
+function renderCategories(){
+  const c = document.getElementById('categories');
+  c.innerHTML='';
+  categories.forEach(cat=>{
+    const b = document.createElement('button');
+    b.innerText=cat;
+    b.onclick=()=>{filterCategory(cat);};
+    c.appendChild(b);
+  });
+}
+
+function filterCategory(cat){
+  filteredProducts = allProducts.filter(p=>(p.category||'Разное')===cat);
+  render(filteredProducts);
+}
+
+function searchProducts(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filteredProducts = allProducts.filter(p=>p.name.toLowerCase().includes(q));
+  render(filteredProducts);
 }
 
 function render(arr){
@@ -86,27 +136,25 @@ function render(arr){
   });
 }
 
-function openModal(i, e){
-  e.stopPropagation(); // чтобы не срабатывала карточка подложка
-  currentProduct = allProducts[i];
+function openModal(i,e){
+  e.stopPropagation();
+  currentProduct = filteredProducts[i];
   currentQty = 1;
   document.getElementById('modalImg').src = currentProduct.image;
   document.getElementById('modalName').innerText = currentProduct.name;
   document.getElementById('modalDesc').innerText = currentProduct.description;
-  document.getElementById('modalPrice').innerText = currentProduct.price + ' ₽';document.getElementById('modalQty').innerText = currentQty;
+  document.getElementById('modalPrice').innerText = currentProduct.price + ' ₽';
+  document.getElementById('modalQty').innerText = currentQty;
   document.getElementById('modal').style.display='flex';
 }
 
 function closeModal(){document.getElementById('modal').style.display='none';}
 
-function changeQty(d){
-  currentQty = Math.max(1, currentQty+d);
-  document.getElementById('modalQty').innerText = currentQty;
-}
+function changeQty(d){currentQty=Math.max(1,currentQty+d);document.getElementById('modalQty').innerText=currentQty;}
 
 function addFromModal(){
   const f = cart.find(x=>x.name===currentProduct.name);
-  if(f) f.qty += currentQty;
+  if(f) f.qty+=currentQty;
   else cart.push({...currentProduct, qty: currentQty});
   save();
   closeModal();
@@ -132,10 +180,19 @@ function del(i){cart.splice(i,1);save();drawCart();}
 
 function checkout(){
   if(!cart.length) return;
+  const promo = document.getElementById('promoCode').value;
   let t='🛒 Заказ:%0A%0A', sum=0;
   cart.forEach((p,i)=>{t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`; sum+=p.price*p.qty;});
+  if(promo) t+=`%0AПромокод: ${promo}`;
   t+=`%0AИтого: ${sum} ₽`;
   tg.openTelegramLink(`https://t.me/${ADMIN_USERNAME}?text=${t}`);
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.nav button[onclick*="${tab}"]`).classList.add('active');
+  if(tab==='cartTab') openCart(); else closeCart();
+  // для примера: другие вкладки пока пустые
 }
 
 loadProducts();
