@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title></title>
+<title>Mini Scooter Shop</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body{margin:0;font-family:'Segoe UI',sans-serif;background:#0e0e0e;color:#fff;overflow:hidden;}
@@ -151,7 +151,7 @@ function filterProducts(){
 function renderMain(){
   const c=document.getElementById('mainProducts');
   c.innerHTML='';
-  filteredProducts.forEach((p,i)=>{
+  filteredProducts.forEach((p)=>{
     const d=document.createElement('div');
     d.className='card';
     d.innerHTML=`
@@ -228,13 +228,23 @@ function drawCart(){
 function changeQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d); saveCart(); drawCart();}
 function del(i){cart.splice(i,1); saveCart(); drawCart();}
 function saveCart(){localStorage.setItem('cart',JSON.stringify(cart));}
+
+// Checkout с отправкой в ЛС админа
 function checkout(){
   if(!cart.length) return;
   const promo=document.getElementById('promoCode').value;
-  let t='🛒 Заказ:%0A%0A', sum=0;
-  cart.forEach((p,i)=>{t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`; sum+=p.price*p.qty;});
-  if(promo) t+=`%0AПромокод: ${promo}`;
-  t+=`%0AИтого: ${sum} ₽`;
+  let t='🛒 Заказ:%0A%0A';
+  let sum=0;
+
+  cart.forEach((p,i)=>{
+    t += ${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A;
+    sum += p.price*p.qty;
+  });
+
+  if(promo) t += %0AПромокод: ${promo};
+
+  t += %0AИтого: ${sum} ₽;
+
   tg.openTelegramLink(`https://t.me/${ADMIN_USERNAME}?text=${t}`);
 }
 
