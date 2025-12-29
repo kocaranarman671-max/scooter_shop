@@ -6,62 +6,83 @@
 <title>Scooter Shop</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-body{margin:0;font-family:sans-serif;background:#0e0e0e;color:#fff}
-header{padding:16px;text-align:center;font-size:22px;background:#151515;border-bottom:1px solid #222}
-.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#151515;border-top:1px solid #222;padding:10px 0;}
-.nav button{background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:#0e0e0e;color:#fff;overflow-x:hidden;}
+header{padding:16px;text-align:center;font-size:22px;background:#151515;border-bottom:1px solid #222;position:sticky;top:0;z-index:10}
+.search-container{padding:0 16px;margin-top:10px}
+.search-container input{width:100%;padding:10px;border-radius:20px;border:none;background:#222;color:#fff;outline:none;transition:0.3s}
+.search-container input:focus{background:#333;}
+.categories{display:flex;overflow-x:auto;padding:10px 16px;gap:10px}
+.categories button{padding:8px 16px;border:none;border-radius:20px;background:#222;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:0.3s}
+.categories button.active{background:#2f80ff;}
+.tab-content{position:absolute;top:0;left:100%;width:100%;height:100%;transition:0.5s;overflow-y:auto;opacity:0;pointer-events:none;}
+.tab-content.active{left:0;opacity:1;pointer-events:auto;}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;padding:16px;padding-bottom:120px;transition:0.3s}
+.card{background:#181818;border-radius:24px 24px 12px 12px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,0.4);transition:transform 0.3s, box-shadow 0.3s;}
+.card:hover{transform:scale(1.05);box-shadow:0 8px 16px rgba(0,0,0,0.6);}
+.card img{width:100%;height:120px;object-fit:cover;border-radius:24px 24px 0 0;margin-bottom:8px;transition:0.3s}
+.card .name{margin-bottom:4px;font-weight:600}
+.card .price{font-weight:600;margin-bottom:8px}
+.card .buttons{display:flex;gap:6px;margin-bottom:12px;width:100%;padding:0 8px}
+.card button{flex:1;padding:6px;border:none;border-radius:14px;color:#fff;background:#2f80ff;cursor:pointer;transition:0.3s}
+.card button:hover{background:#1c5ac7}
+.nav{position:fixed;bottom:0;width:100%;display:flex;justify-content:space-around;background:#151515;border-top:1px solid #222;padding:10px 0;align-items:center;z-index:10;}
+.nav button{background:none;border:none;color:#aaa;font-size:12px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:0.3s;}
 .nav button.active{color:#2f80ff;font-weight:600;}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:16px;padding-bottom:70px}
-.card{background:#181818;border-radius:18px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center}
-.card img{width:100%;height:140px;object-fit:cover}
-.card .price{font-weight:600;margin:8px 0}
-.add{width:90%;border:none;border-radius:14px;padding:8px;background:linear-gradient(135deg,#2f80ff,#6aa8ff);color:#fff;cursor:pointer}
-.modal{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column;padding:16px;z-index:1000}
-.modal .close{align-self:flex-end;color:#ff4d4d;font-size:24px;cursor:pointer}
-.modal img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px}
-.modal .desc{margin-bottom:12px}
-.qty{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-.qty button{width:32px;height:32px;border-radius:50%;border:none;background:#2f80ff;color:#fff;font-size:18px}
-.cart{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column}
+.nav img{width:24px;height:24px;margin-bottom:2px;border-radius:50%}
+.cart-btn{position:fixed;bottom:70px;left:16px;right:16px;padding:12px;border-radius:20px;background:#25d366;color:#fff;font-weight:600;font-size:16px;border:none;cursor:pointer;z-index:1000;transition:0.3s;}
+.cart-btn:hover{background:#1ebc5f;}
+.cart{position:fixed;inset:0;background:rgba(14,14,14,0.95);display:flex;flex-direction:column;z-index:1001;opacity:0;transform:translateY(100%);transition:0.5s;}
+.cart.open{opacity:1;transform:translateY(0);}
 .cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center}
 .cart-items{flex:1;overflow:auto;padding:16px}
-.cart-item{display:flex;justify-content:space-between;margin-bottom:10px}
-.remove{color:#ff4d4d;cursor:pointer}
+.cart-item{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;transition:0.3s}
+.cart-item img{width:60px;height:60px;object-fit:cover;border-radius:12px;margin-right:12px}
+.cart-item-info{flex:1}
+.qty-controls{display:flex;gap:6px;align-items:center;margin-top:4px}
+.qty-controls button{width:28px;height:28px;border:none;border-radius:50%;background:#2f80ff;color:#fff;font-size:16px;cursor:pointer;transition:0.2s}
+.qty-controls button:hover{background:#1c5ac7}
+.remove{color:#ff4d4d;cursor:pointer;margin-left:8px}
 .cart-footer{padding:16px;border-top:1px solid #222;display:flex;flex-direction:column;gap:10px}
-.search{margin:16px;display:flex;gap:8px}
-.search input{flex:1;padding:8px;border-radius:12px;border:none;background:#222;color:#fff}
-.categories{display:flex;overflow-x:auto;padding:0 16px 10px 16px;gap:10px}
-.categories button{padding:6px 12px;border:none;border-radius:12px;background:#222;color:#fff;cursor:pointer;white-space:nowrap}
-.categories button.active{background:#2f80ff}
+input.promo{padding:8px;border-radius:14px;border:none;background:#222;color:#fff;width:100%;transition:0.3s}
+input.promo:focus{background:#333;}
+.profile-info{display:flex;align-items:center;gap:12px;padding:16px}
+.profile-info img{width:60px;height:60px;border-radius:50%}
+.profile-info div{display:flex;flex-direction:column}
+.add-cart-anim{position:absolute;width:50px;height:50px;border-radius:50%;background:#2f80ff;z-index:10000;pointer-events:none;transition:all 0.7s;}
 </style>
 </head>
 <body>
 <header>🛵 Магазин запчастей</header>
 
 <!-- Поиск -->
-<div class="search">
-  <input type="text" id="searchInput" placeholder="Поиск товара..." oninput="searchProducts()">
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Поиск товара..." oninput="filterProducts()">
 </div>
 
 <!-- Категории -->
 <div class="categories" id="categories"></div>
 
-<div class="products" id="products"></div>
+<!-- Вкладки -->
+<div id="main" class="tab-content active">
+  <div class="products" id="mainProducts"></div>
+</div>
 
-<!-- Модальное окно товара -->
-<div class="modal" id="modal">
-  <span class="close" onclick="closeModal()">✕</span>
-  <img id="modalImg">
-  <h3 id="modalName"></h3>
-  <div class="desc" id="modalDesc"></div>
-  <div class="price" id="modalPrice"></div>
-  <div class="qty">
-    <button onclick="changeQty(-1)">−</button>
-    <span id="modalQty">1</span>
-    <button onclick="changeQty(1)">+</button>
+<div id="fav" class="tab-content">
+  <div class="products" id="favProducts"></div>
+</div>
+
+<div id="cartTab" class="tab-content">
+  <button class="cart-btn" onclick="openCart()">🛒 Оформить заказ</button>
+</div>
+
+<div id="profile" class="tab-content">
+  <div class="profile-info">
+    <img id="userAvatar" src="" alt="Аватар">
+    <div>
+      <div id="userName"></div>
+      <div id="userID"></div>
+    </div>
   </div>
-  <input type="text" id="promoCode" placeholder="Промокод (если есть)" style="margin-bottom:12px;padding:8px;border-radius:12px;border:none;background:#222;color:#fff;">
-  <button class="add" onclick="addFromModal()">В корзину</button>
 </div>
 
 <!-- Корзина -->
@@ -69,118 +90,191 @@ header{padding:16px;text-align:center;font-size:22px;background:#151515;border-b
   <div class="cart-header">Корзина <span onclick="closeCart()" style="cursor:pointer">✕</span></div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
-    <button class="add" onclick="checkout()">Оформить заказ</button>
+    <input type="text" id="promoCode" class="promo" placeholder="Промокод (если есть)">
+    <button class="cart-btn" onclick="checkout()" style="position:static;bottom:auto;margin-top:10px;">Подтвердить заказ</button>
   </div>
 </div>
 
 <!-- Нижнее меню -->
 <div class="nav">
-  <button class="active" onclick="switchTab('main')">Главное</button>
-  <button onclick="switchTab('fav')">Избранное</button>
-  <button onclick="switchTab('cartTab')">Корзина</button>
-  <button onclick="switchTab('profile')">Профиль</button>
-</div><script>
+  <button class="active" onclick="switchTab('main')"><span>🏠</span>Главное</button>
+  <button onclick="switchTab('fav')"><span>❤️</span>Избранное</button>
+  <button onclick="switchTab('cartTab')"><span>🛒</span>Корзина</button>
+  <button onclick="switchTab('profile')"><img id="navAvatar" src="" alt="">Профиль</button>
+</div>
+
+<script>
 const tg = window.Telegram.WebApp; tg.expand();
+const user = tg.initDataUnsafe?.user || {};
+document.getElementById('userAvatar').src = user?.photo_url || '';
+document.getElementById('navAvatar').src = user?.photo_url || '';
+document.getElementById('userName').innerText = user?.first_name || 'Пользователь';
+document.getElementById('userID').innerText = 'ID: '+(user?.id||'') ;
 
 const GOOGLE_SHEET_URL = 'https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
 const ADMIN_USERNAME = 'andrew_malov';
 
-let allProducts=[]; // все товары
+let allProducts=[];
 let filteredProducts=[];
-let categories=[]; 
 let cart=JSON.parse(localStorage.getItem('cart')||'[]');
-let currentQty=1;
-let currentProduct=null;
+let favorites=JSON.parse(localStorage.getItem('favorites')||'[]');
+let categories=[];
 
 async function loadProducts(){
   const r = await fetch(GOOGLE_SHEET_URL);
   allProducts = await r.json();
-  // формируем список категорий
-  const catSet = new Set(allProducts.map(p=>p.category||'Разное'));
-  categories = Array.from(catSet);
-  renderCategories();
   filteredProducts = [...allProducts];
-  render(filteredProducts);
+  categories = Array.from(new Set(allProducts.map(p=>p.category||'Разное')));
+  renderCategories();
+  renderMain();
+  renderFav();
 }
 
 function renderCategories(){
-  const c = document.getElementById('categories');
+  const c=document.getElementById('categories');
   c.innerHTML='';
   categories.forEach(cat=>{
-    const b = document.createElement('button');
+    const b=document.createElement('button');
     b.innerText=cat;
-    b.onclick=()=>{filterCategory(cat);};
+    b.onclick=()=>{filterByCategory(cat);}
     c.appendChild(b);
   });
 }
 
-function filterCategory(cat){
+function filterByCategory(cat){
   filteredProducts = allProducts.filter(p=>(p.category||'Разное')===cat);
-  render(filteredProducts);
+  renderMain();
 }
 
-function searchProducts(){
-  const q = document.getElementById('searchInput').value.toLowerCase();
+function filterProducts(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
   filteredProducts = allProducts.filter(p=>p.name.toLowerCase().includes(q));
-  render(filteredProducts);
+  renderMain();
 }
 
-function render(arr){
-  const c = document.getElementById('products');
+function renderMain(){
+  const c=document.getElementById('mainProducts');
   c.innerHTML='';
-  arr.forEach((p,i)=>{
-    const d = document.createElement('div');
+  filteredProducts.forEach((p,i)=>{
+    const d=document.createElement('div');
     d.className='card';
-    d.innerHTML=`<img src="${p.image}"><div class="price">${p.price} ₽</div><button class="add" onclick="openModal(${i}, event)">Подробнее</button>`;
+    d.innerHTML=`
+      <img src="${p.image}">
+      <div class="price">${p.price} ₽</div>
+      <div class="name">${p.name}</div>
+      <div class="buttons">
+        <button onclick="toggleFavorite(${i})">${favorites.includes(p.name)?'💔':'❤️'}</button>
+        <button onclick="addToCartAnim(${i},this)">В корзину</button>
+      </div>
+    `;
     c.appendChild(d);
   });
 }
 
-function openModal(i,e){
-  e.stopPropagation();
-  currentProduct = filteredProducts[i];
-  currentQty = 1;
-  document.getElementById('modalImg').src = currentProduct.image;
-  document.getElementById('modalName').innerText = currentProduct.name;
-  document.getElementById('modalDesc').innerText = currentProduct.description;
-  document.getElementById('modalPrice').innerText = currentProduct.price + ' ₽';
-  document.getElementById('modalQty').innerText = currentQty;
-  document.getElementById('modal').style.display='flex';
+function renderFav(){
+  const c=document.getElementById('favProducts');
+  c.innerHTML='';
+  const favProducts=allProducts.filter(p=>favorites.includes(p.name));
+  favProducts.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='card';
+    d.innerHTML=`
+      <img src="${p.image}">
+      <div class="price">${p.price} ₽</div>
+      <div class="name">${p.name}</div>
+      <div class="buttons">
+        <button onclick="toggleFavoriteByName('${p.name}')">💔</button>
+        <button onclick="addToCartByNameAnim('${p.name}',this)">В корзину</button>
+      </div>
+    `;
+    c.appendChild(d);
+  });
 }
 
-function closeModal(){document.getElementById('modal').style.display='none';}
-
-function changeQty(d){currentQty=Math.max(1,currentQty+d);document.getElementById('modalQty').innerText=currentQty;}
-
-function addFromModal(){
-  const f = cart.find(x=>x.name===currentProduct.name);
-  if(f) f.qty+=currentQty;
-  else cart.push({...currentProduct, qty: currentQty});
-  save();
-  closeModal();
+function toggleFavorite(i){
+  const p=filteredProducts[i];
+  const idx=favorites.indexOf(p.name);
+  if(idx>-1) favorites.splice(idx,1); else favorites.push(p.name);
+  localStorage.setItem('favorites',JSON.stringify(favorites));
+  renderMain(); renderFav();
 }
 
-function save(){localStorage.setItem('cart',JSON.stringify(cart));tg.HapticFeedback.impactOccurred('light');}
+function toggleFavoriteByName(name){
+  const idx=favorites.indexOf(name);
+  if(idx>-1) favorites.splice(idx,1);
+  localStorage.setItem('favorites',JSON.stringify(favorites));
+  renderMain(); renderFav();
+}
 
-function openCart(){document.getElementById('cart').style.display='flex';drawCart();}
-function closeCart(){document.getElementById('cart').style.display='none';}
+// Добавление в корзину с анимацией
+function addToCartAnim(i,btn){
+  const rect=btn.getBoundingClientRect();
+  const anim=document.createElement('div');
+  anim.className='add-cart-anim';
+  anim.style.left=rect.left+'px';
+  anim.style.top=rect.top+'px';
+  document.body.appendChild(anim);
+  setTimeout(()=>{anim.style.left=window.innerWidth-50+'px'; anim.style.top=window.innerHeight-130+'px'; anim.style.transform='scale(0.1)';},10);
+  setTimeout(()=>{document.body.removeChild(anim); addToCart(i);},700);
+}
+
+function addToCartByNameAnim(name,btn){
+  const rect=btn.getBoundingClientRect();
+  const anim=document.createElement('div');
+  anim.className='add-cart-anim';
+  anim.style.left=rect.left+'px';
+  anim.style.top=rect.top+'px';
+  document.body.appendChild(anim);
+  setTimeout(()=>{anim.style.left=window.innerWidth-50+'px'; anim.style.top=window.innerHeight-130+'px'; anim.style.transform='scale(0.1)';},10);
+  setTimeout(()=>{document.body.removeChild(anim); addToCartByName(name);},700);
+}
+
+function addToCart(i){
+  const product = filteredProducts[i];
+  const f = cart.find(x=>x.name===product.name);
+  if(f) f.qty+=1; else cart.push({...product, qty:1});
+  saveCart();
+}
+function addToCartByName(name){
+  const product = allProducts.find(p=>p.name===name);
+  const f = cart.find(x=>x.name===product.name);
+  if(f) f.qty+=1; else cart.push({...product, qty:1});
+  saveCart();
+}
+
+function openCart(){document.getElementById('cart').classList.add('open'); drawCart();}
+function closeCart(){document.getElementById('cart').classList.remove('open');}
 
 function drawCart(){
-  const c = document.getElementById('cartItems'); 
+  const c=document.getElementById('cartItems');
   c.innerHTML='';
   cart.forEach((p,i)=>{
     const d=document.createElement('div');
     d.className='cart-item';
-    d.innerHTML=`<div>${p.name} x${p.qty}</div><div><span>${p.price*p.qty} ₽</span> <span class="remove" onclick="del(${i})">✕</span></div>`;
+    d.innerHTML=`
+      <img src="${p.image}">
+      <div class="cart-item-info">
+        <div>${p.name}</div>
+        <div class="qty-controls">
+          <button onclick="changeQty(${i},-1)">−</button>
+          <span>${p.qty}</span>
+          <button onclick="changeQty(${i},1)">+</button>
+          <span class="remove" onclick="del(${i})">✕</span>
+        </div>
+      </div>
+      <div>${p.price*p.qty} ₽</div>
+    `;
     c.appendChild(d);
   });
 }
 
-function del(i){cart.splice(i,1);save();drawCart();}
+function changeQty(i,d){cart[i].qty=Math.max(1,cart[i].qty+d); saveCart(); drawCart();}
+function del(i){cart.splice(i,1); saveCart(); drawCart();}
+function saveCart(){localStorage.setItem('cart',JSON.stringify(cart));}
 
 function checkout(){
   if(!cart.length) return;
-  const promo = document.getElementById('promoCode').value;
+  const promo=document.getElementById('promoCode').value;
   let t='🛒 Заказ:%0A%0A', sum=0;
   cart.forEach((p,i)=>{t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`; sum+=p.price*p.qty;});
   if(promo) t+=`%0AПромокод: ${promo}`;
@@ -191,8 +285,9 @@ function checkout(){
 function switchTab(tab){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.querySelector(`.nav button[onclick*="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
   if(tab==='cartTab') openCart(); else closeCart();
-  // для примера: другие вкладки пока пустые
 }
 
 loadProducts();
