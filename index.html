@@ -1,67 +1,341 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scooter Parts Shop</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0e0e0e;color:#fff}
-    header{padding:16px;text-align:center;font-size:22px;font-weight:600;background:#151515;border-bottom:1px solid #222}
-    .search{padding:12px 16px}
-    .search input{width:100%;padding:12px;border-radius:14px;border:none;background:#1b1b1b;color:#fff}
-    .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:16px}
-    .card{background:#181818;border-radius:18px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,.45);display:flex;flex-direction:column}
-    .card img{width:100%;height:140px;object-fit:cover}
-    .card-content{padding:12px;flex:1}
-    .desc{font-size:13px;opacity:.7;margin-bottom:8px}
-    .price{font-weight:600;margin-bottom:10px}
-    .qty{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    .qty button{width:32px;height:32px;border-radius:50%;border:none;background:#2f80ff;color:#fff;font-size:18px}
-    .add{width:100%;border:none;border-radius:14px;padding:10px;background:linear-gradient(135deg,#2f80ff,#6aa8ff);color:#fff}
-    .cart-btn{position:fixed;bottom:16px;left:16px;right:16px;background:#25d366;font-size:16px;padding:14px;border-radius:18px}
-    .cart{position:fixed;inset:0;background:#0e0e0e;display:none;flex-direction:column}
-    .cart-header{padding:16px;font-size:18px;font-weight:600;border-bottom:1px solid #222}
-    .cart-items{flex:1;overflow:auto;padding:16px}
-    .cart-item{display:flex;justify-content:space-between;margin-bottom:10px}
-    .remove{color:#ff4d4d;cursor:pointer}
-    .cart-footer{padding:16px;border-top:1px solid #222}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>757 SHOP Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            text-align: center;
+            padding: 14px;
+            font-size: 22px;
+            font-weight: 700;
+            border-bottom: 1px solid #1a1a1a;
+            letter-spacing: 1px;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .product {
+            background: #0d0d0d;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            border: 1px solid #111;
+        }
+        .product img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .product-info {
+            padding: 10px 8px;
+        }
+        .add-btn {
+            background: #1a1a1a;
+            color: #eee;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .add-btn:hover { background: #222; }
+
+        .cart {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background: #0d0d0d;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid #111;
+        }
+        .cart-item-info { flex: 1; padding-right: 10px; }
+        .cart-item-name { font-weight: 600; margin-bottom: 4px; font-size: 15px; }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        .quantity-btn {
+            background: #1a1a1a;
+            color: #ccc;
+            border: none;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-value {
+            width: 44px;
+            text-align: center;
+            font-weight: 600;
+            color: #eee;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+        }
+        .delete-btn { color: #ff4d4d; }
+        .total {
+            padding: 16px 12px;
+            font-size: 19px;
+            font-weight: 700;
+            text-align: right;
+            border-top: 1px solid #1a1a1a;
+            background: #000;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            background: #000;
+            padding: 10px 0;
+            border-top: 1px solid #111;
+        }
+        .nav button {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+        .nav button.active { color: #fff; }
+        .badge {position: absolute;
+            top: -4px;
+            right: -8px;
+            background: #ff3333;
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        svg.icon { width: 24px; height: 24px; fill: currentColor; }
+    </style>
 </head>
 <body>
-<header>🛵 Магазин запчастей</header>
-<div class="search"><input placeholder="Поиск..." oninput="search(this.value)"></div>
-<div class="products" id="products"></div>
-<button class="cart-btn" onclick="openCart()">🛒 Корзина</button>
 
-<div class="cart" id="cart">
-  <div class="cart-header">Корзина</div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-footer">
-    <button class="add" onclick="checkout()">Оформить заказ</button>
-    <button class="add" style="margin-top:10px;background:#444" onclick="closeCart()">Закрыть</button>
-  </div>
-</div>
+    <div class="header">757 SHOP</div>
 
-<script>
-const tg = window.Telegram.WebApp; tg.expand();
-const GOOGLE_SHEET_URL='https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
-const ADMIN_USERNAME='andrew_malov';
-let allProducts=[];
-let cart=JSON.parse(localStorage.getItem('cart')||'[]');
+    <div class="products" id="products"></div>
 
-async function loadProducts(){const r=await fetch(GOOGLE_SHEET_URL);allProducts=await r.json();render(allProducts)}
-function render(arr){const c=document.getElementById('products');c.innerHTML='';arr.forEach((p,i)=>{p.qty=p.qty||1;const d=document.createElement('div');d.className='card';d.innerHTML=`<img src="${p.image}"><div class=card-content><h3>${p.name}</h3><div class=desc>${p.description}</div><div class=price>${p.price} ₽</div><div class=qty><button onclick="chg(${i},-1)">−</button><span id=q${i}>${p.qty}</span><button onclick="chg(${i},1)">+</button></div><button class=add onclick="add(${i})">В корзину</button></div>`;c.appendChild(d)})}
-function chg(i,d){allProducts[i].qty=Math.max(1,allProducts[i].qty+d);document.getElementById('q'+i).innerText=allProducts[i].qty}
-function add(i){const p=allProducts[i];const f=cart.find(x=>x.name===p.name);if(f)f.qty+=p.qty;else cart.push({...p});save()}
-function save(){localStorage.setItem('cart',JSON.stringify(cart));tg.HapticFeedback.impactOccurred('light')}
-function search(q){q=q.toLowerCase();render(allProducts.filter(p=>p.name.toLowerCase().includes(q)))}
-function openCart(){document.getElementById('cart').style.display='flex';drawCart()}
-function closeCart(){document.getElementById('cart').style.display='none'}
-function drawCart(){const c=document.getElementById('cartItems');c.innerHTML='';cart.forEach((p,i)=>{const d=document.createElement('div');d.className='cart-item';d.innerHTML=`<div>${p.name} x${p.qty}</div><div><span>${p.price*p.qty} ₽</span> <span class=remove onclick="del(${i})">✕</span></div>`;c.appendChild(d)})}
-function del(i){cart.splice(i,1);save();drawCart()}
-function checkout(){if(!cart.length)return;let t='🛒 Заказ:%0A%0A',sum=0;cart.forEach((p,i)=>{t+=`${i+1}. ${p.name} x${p.qty} — ${p.price*p.qty} ₽%0A`;sum+=p.price*p.qty});t+=`%0AИтого: ${sum} ₽`;tg.openTelegramLink(`https://t.me/${ADMIN_USERNAME}?text=${t}`)}
-loadProducts();
-</script>
+    <div class="cart" id="cart">
+        <h2 style="margin:0 0 16px 0; font-size:20px;">Корзина</h2>
+        <div id="cart-items"></div>
+        <div class="total" id="total">Итого: 0 ₽</div>
+    </div>
+
+    <div class="nav">
+        <button id="home-btn" class="active">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Главная
+        </button>
+        <button id="cart-btn">
+            <div style="position:relative;">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7 13h10l3-8H5.82L7 13zM7 3v4H4V3H1v2h3v3h3V5h12l3.29 9H7v2h12.59L16 7H9v2h6.41L14 13H7v-2z"/></svg>
+                <span id="cart-count" class="badge" style="display:none;">0</span>
+            </div>
+            Корзина
+        </button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const SHEETS_URL = 'https://opensheet.elk.sh/1zhx7gZD_DCpyIenODrCjwaMRyU6hl7LTkiaJvRpK43I/ScooterShop';
+        const OWNER_USERNAME = 'andrew_malov';
+
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('757shop_cart')) || [];
+        let currentPage = 'home';
+
+        async function loadProducts() {
+            try {
+                const res = await fetch(SHEETS_URL);
+                products = await res.json();
+                renderProducts();
+            } catch (e) {
+                tg.showAlert('Не удалось загрузить товары');
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products');
+            container.innerHTML = '';
+            products.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'product';
+                div.innerHTML = `
+                    <img src="${p.image}" alt="${p.name}">
+                    <div class="product-info">
+                        <div style="font-weight:600; margin-bottom:4px;">${p.name}</div>
+                        <div style="color:#ccc;">${p.price} ₽</div>
+                        <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g,"\\'")}', ${p.price})">В корзину</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addToCart(name, price) {
+            const existing = cart.find(item => item.name === name);
+            if (existing) existing.quantity++;
+            else cart.push({ name, price, quantity: 1 });
+            saveCart();
+            updateCartCount();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function changeQuantity(index, delta) {
+            cart[index].quantity = Math.max(1, cart[index].quantity + delta);
+            saveCart();
+            renderCart();
+            updateCartCount();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+            renderCart();
+            updateCartCount();
+            tg.HapticFeedback.notificationOccurred('warning');
+        }
+
+        function saveCart() {
+            localStorage.setItem('757shop_cart', JSON.stringify(cart));
+        }
+
+        function updateCartCount() {
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');badge.textContent = total || '';
+            badge.style.display = total > 0 ? 'flex' : 'none';
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            let totalSum = 0;
+
+            cart.forEach((item, i) => {
+                const sum = item.price * item.quantity;
+                totalSum += sum;
+
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div style="color:#aaa; font-size:14px;">${item.price} ₽ × ${item.quantity}</div>
+                    </div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(${i}, -1)">−</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="changeQuantity(${i}, 1)">+</button>
+                    </div>
+                    <button class="icon-btn delete-btn" onclick="removeItem(${i})">
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('total').textContent = Итого: ${totalSum} ₽;
+        }
+
+        function showPage(page) {
+            currentPage = page;
+            document.getElementById('products').style.display = page === 'home' ? 'grid' : 'none';
+            document.getElementById('cart').style.display = page === 'cart' ? 'flex' : 'none';
+
+            document.getElementById('home-btn').classList.toggle('active', page === 'home');
+            document.getElementById('cart-btn').classList.toggle('active', page === 'cart');
+
+            if (page === 'cart') {
+                renderCart();
+                tg.MainButton.setText('ОФОРМИТЬ ЗАКАЗ');
+                tg.MainButton.show();
+                tg.MainButton.onClick(checkout);
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) return tg.showAlert('Корзина пуста');
+
+            let message = 'Новый заказ 757 🔥\n\n';
+            let total = 0;
+
+            cart.forEach(item => {
+                const sum = item.price * item.quantity;
+                message += ${item.name} × ${item.quantity} — ${sum} ₽\n;
+                total += sum;
+            });
+
+            message += \nИтого: ${total} ₽;
+
+            const url = https://t.me/${OWNER_USERNAME}?text=${encodeURIComponent(message)};
+            tg.openTelegramLink(url);
+            tg.close();
+        }
+
+        // Навигация
+        document.getElementById('home-btn').onclick = () => showPage('home');
+        document.getElementById('cart-btn').onclick = () => showPage('cart');
+
+        // Инициализация
+        updateCartCount();
+        loadProducts();
+        showPage('home');
+    </script>
 </body>
 </html>
